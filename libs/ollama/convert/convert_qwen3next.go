@@ -1438,16 +1438,16 @@ func (q *qwen3NextModel) splitQKVZTensor(t Tensor) (*ggml.Tensor, *ggml.Tensor, 
 	gateName := strings.Replace(t.Name(), "ssm_in", "attn_gate", 1)
 
 	return &ggml.Tensor{
-			Name:     qkvName,
-			Kind:     t.Kind(),
-			Shape:    []uint64{uint64(spec.qkvOut), uint64(spec.hidden)},
-			WriterTo: qkvTensor,
-		}, &ggml.Tensor{
-			Name:     gateName,
-			Kind:     t.Kind(),
-			Shape:    []uint64{uint64(spec.gateOut), uint64(spec.hidden)},
-			WriterTo: gateTensor,
-		}, true
+		Name:     qkvName,
+		Kind:     t.Kind(),
+		Shape:    []uint64{uint64(spec.qkvOut), uint64(spec.hidden)},
+		WriterTo: qkvTensor,
+	}, &ggml.Tensor{
+		Name:     gateName,
+		Kind:     t.Kind(),
+		Shape:    []uint64{uint64(spec.gateOut), uint64(spec.hidden)},
+		WriterTo: gateTensor,
+	}, true
 }
 
 func (q *qwen3NextModel) repackQKVZ(spec qkvzSplitSpec, extractGate bool) Repacker {
