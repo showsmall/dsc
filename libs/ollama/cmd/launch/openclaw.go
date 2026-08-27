@@ -393,7 +393,7 @@ func openclawPluginStageDir() string {
 	if err != nil {
 		return ""
 	}
-	return filepath.Join(home, ".openclaw", "plugin-runtime-deps")
+	return filepath.Join(home, ".openclaw", "core-runtime-deps")
 }
 
 // portOpen checks if a TCP port is currently accepting connections.
@@ -793,9 +793,9 @@ func clearSessionModelOverride(primary string) {
 
 // configureOllamaWebSearch keeps launch-managed OpenClaw installs on the
 // bundled Ollama web_search provider. Older launch builds installed an
-// external openclaw-web-search plugin that added custom ollama_web_search and
+// external openclaw-web-search core that added custom ollama_web_search and
 // ollama_web_fetch tools. Current OpenClaw versions ship Ollama web_search as
-// the bundled "ollama" plugin instead, so we migrate stale config and ensure
+// the bundled "ollama" core instead, so we migrate stale config and ensure
 // fresh installs select the bundled provider.
 func configureOllamaWebSearch() {
 	home, err := os.UserHomeDir()
@@ -814,11 +814,11 @@ func configureOllamaWebSearch() {
 
 	stalePluginConfigured := false
 
-	plugins, _ := config["plugins"].(map[string]any)
-	if plugins == nil {
-		plugins = make(map[string]any)
+	cores, _ := config["cores"].(map[string]any)
+	if cores == nil {
+		cores = make(map[string]any)
 	}
-	entries, _ := plugins["entries"].(map[string]any)
+	entries, _ := cores["entries"].(map[string]any)
 	if entries == nil {
 		entries = make(map[string]any)
 	}
@@ -869,9 +869,9 @@ func configureOllamaWebSearch() {
 	}
 	ollamaEntry["enabled"] = true
 	entries["ollama"] = ollamaEntry
-	plugins["entries"] = entries
+	cores["entries"] = entries
 
-	if allow, ok := plugins["allow"].([]any); ok {
+	if allow, ok := cores["allow"].([]any); ok {
 		var nextAllow []any
 		hasOllama := false
 		for _, v := range allow {
@@ -888,18 +888,18 @@ func configureOllamaWebSearch() {
 		if !hasOllama {
 			nextAllow = append(nextAllow, "ollama")
 		}
-		plugins["allow"] = nextAllow
+		cores["allow"] = nextAllow
 	}
 
-	if installs, ok := plugins["installs"].(map[string]any); ok {
+	if installs, ok := cores["installs"].(map[string]any); ok {
 		if _, exists := installs["openclaw-web-search"]; exists {
 			delete(installs, "openclaw-web-search")
 			stalePluginConfigured = true
 		}
 		if len(installs) > 0 {
-			plugins["installs"] = installs
+			cores["installs"] = installs
 		} else {
-			delete(plugins, "installs")
+			delete(cores, "installs")
 		}
 	}
 
@@ -915,7 +915,7 @@ func configureOllamaWebSearch() {
 		web["fetch"] = fetch
 	}
 	tools["web"] = web
-	config["plugins"] = plugins
+	config["cores"] = cores
 	config["tools"] = tools
 
 	out, err := json.MarshalIndent(config, "", "  ")

@@ -318,8 +318,8 @@ exit 0
 	if env["OPENCLAW_EAGER_BUNDLED_PLUGIN_DEPS"] != "1" {
 		t.Fatalf("OPENCLAW_EAGER_BUNDLED_PLUGIN_DEPS = %q, want %q", env["OPENCLAW_EAGER_BUNDLED_PLUGIN_DEPS"], "1")
 	}
-	if env["OPENCLAW_PLUGIN_STAGE_DIR"] != filepath.Join(tmpDir, ".openclaw", "plugin-runtime-deps") {
-		t.Fatalf("OPENCLAW_PLUGIN_STAGE_DIR = %q, want %q", env["OPENCLAW_PLUGIN_STAGE_DIR"], filepath.Join(tmpDir, ".openclaw", "plugin-runtime-deps"))
+	if env["OPENCLAW_PLUGIN_STAGE_DIR"] != filepath.Join(tmpDir, ".openclaw", "core-runtime-deps") {
+		t.Fatalf("OPENCLAW_PLUGIN_STAGE_DIR = %q, want %q", env["OPENCLAW_PLUGIN_STAGE_DIR"], filepath.Join(tmpDir, ".openclaw", "core-runtime-deps"))
 	}
 }
 
@@ -521,8 +521,8 @@ func TestOpenclawEnv_StagesBundledPluginRuntimeDeps(t *testing.T) {
 
 	env := envSliceToMap(openclawEnv())
 
-	if env["OPENCLAW_PLUGIN_STAGE_DIR"] != filepath.Join(tmpDir, ".openclaw", "plugin-runtime-deps") {
-		t.Fatalf("OPENCLAW_PLUGIN_STAGE_DIR = %q, want %q", env["OPENCLAW_PLUGIN_STAGE_DIR"], filepath.Join(tmpDir, ".openclaw", "plugin-runtime-deps"))
+	if env["OPENCLAW_PLUGIN_STAGE_DIR"] != filepath.Join(tmpDir, ".openclaw", "core-runtime-deps") {
+		t.Fatalf("OPENCLAW_PLUGIN_STAGE_DIR = %q, want %q", env["OPENCLAW_PLUGIN_STAGE_DIR"], filepath.Join(tmpDir, ".openclaw", "core-runtime-deps"))
 	}
 	if _, ok := env["OPENAI_API_KEY"]; ok {
 		t.Fatal("expected OPENAI_API_KEY to be cleared from openclaw environment")
@@ -597,8 +597,8 @@ exit 0
 	if env["OPENCLAW_EAGER_BUNDLED_PLUGIN_DEPS"] != "1" {
 		t.Fatalf("OPENCLAW_EAGER_BUNDLED_PLUGIN_DEPS = %q, want %q", env["OPENCLAW_EAGER_BUNDLED_PLUGIN_DEPS"], "1")
 	}
-	if env["OPENCLAW_PLUGIN_STAGE_DIR"] != filepath.Join(tmpDir, ".openclaw", "plugin-runtime-deps") {
-		t.Fatalf("OPENCLAW_PLUGIN_STAGE_DIR = %q, want %q", env["OPENCLAW_PLUGIN_STAGE_DIR"], filepath.Join(tmpDir, ".openclaw", "plugin-runtime-deps"))
+	if env["OPENCLAW_PLUGIN_STAGE_DIR"] != filepath.Join(tmpDir, ".openclaw", "core-runtime-deps") {
+		t.Fatalf("OPENCLAW_PLUGIN_STAGE_DIR = %q, want %q", env["OPENCLAW_PLUGIN_STAGE_DIR"], filepath.Join(tmpDir, ".openclaw", "core-runtime-deps"))
 	}
 }
 
@@ -2485,12 +2485,12 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		plugins, _ := config["plugins"].(map[string]any)
-		if plugins == nil {
-			t.Fatal("plugins section missing")
+		cores, _ := config["cores"].(map[string]any)
+		if cores == nil {
+			t.Fatal("cores section missing")
 		}
 
-		entries, _ := plugins["entries"].(map[string]any)
+		entries, _ := cores["entries"].(map[string]any)
 		entry, _ := entries["ollama"].(map[string]any)
 		if enabled, _ := entry["enabled"].(bool); !enabled {
 			t.Error("expected entries.ollama.enabled = true")
@@ -2499,11 +2499,11 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Error("expected stale openclaw-web-search entry to be absent")
 		}
 
-		if _, ok := plugins["allow"]; ok {
-			t.Error("did not expect plugins.allow to be created when no allowlist exists")
+		if _, ok := cores["allow"]; ok {
+			t.Error("did not expect cores.allow to be created when no allowlist exists")
 		}
-		if _, ok := plugins["installs"]; ok {
-			t.Error("did not expect plugins.installs to be created")
+		if _, ok := cores["installs"]; ok {
+			t.Error("did not expect cores.installs to be created")
 		}
 
 		tools, _ := config["tools"].(map[string]any)
@@ -2534,8 +2534,8 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		plugins, _ := config["plugins"].(map[string]any)
-		entries, _ := plugins["entries"].(map[string]any)
+		cores, _ := config["cores"].(map[string]any)
+		entries, _ := cores["entries"].(map[string]any)
 		if len(entries) != 1 {
 			t.Fatalf("expected only bundled ollama entry, got %v", entries)
 		}
@@ -2544,16 +2544,16 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 		}
 	})
 
-	t.Run("migrates stale plugin config and preserves unrelated settings", func(t *testing.T) {
+	t.Run("migrates stale core config and preserves unrelated settings", func(t *testing.T) {
 		initial := map[string]any{
-			"plugins": map[string]any{
-				"allow": []any{"some-other-plugin", "openclaw-web-search"},
+			"cores": map[string]any{
+				"allow": []any{"some-other-core", "openclaw-web-search"},
 				"entries": map[string]any{
-					"some-other-plugin":   map[string]any{"enabled": true},
+					"some-other-core":   map[string]any{"enabled": true},
 					"openclaw-web-search": map[string]any{"enabled": true},
 				},
 				"installs": map[string]any{
-					"some-other-plugin": map[string]any{
+					"some-other-core": map[string]any{
 						"source":      "npm",
 						"installPath": "/some/path",
 					},
@@ -2592,10 +2592,10 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Error("customField was not preserved")
 		}
 
-		plugins, _ := config["plugins"].(map[string]any)
-		entries, _ := plugins["entries"].(map[string]any)
-		if entries["some-other-plugin"] == nil {
-			t.Error("existing plugin entry was lost")
+		cores, _ := config["cores"].(map[string]any)
+		entries, _ := cores["entries"].(map[string]any)
+		if entries["some-other-core"] == nil {
+			t.Error("existing core entry was lost")
 		}
 		if entries["openclaw-web-search"] != nil {
 			t.Error("stale openclaw-web-search entry should be removed")
@@ -2604,19 +2604,19 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Fatal("expected bundled ollama entry to be enabled")
 		}
 
-		installs, _ := plugins["installs"].(map[string]any)
-		if installs["some-other-plugin"] == nil {
+		installs, _ := cores["installs"].(map[string]any)
+		if installs["some-other-core"] == nil {
 			t.Error("existing install record was lost")
 		}
 		if installs["openclaw-web-search"] != nil {
 			t.Error("stale openclaw-web-search install record should be removed")
 		}
 
-		allow, _ := plugins["allow"].([]any)
+		allow, _ := cores["allow"].([]any)
 		hasOther, hasStalePlugin, hasOllama := false, false, false
 		for _, v := range allow {
 			s, _ := v.(string)
-			if s == "some-other-plugin" {
+			if s == "some-other-core" {
 				hasOther = true
 			}
 			if s == "openclaw-web-search" {
@@ -2633,7 +2633,7 @@ func TestConfigureOllamaWebSearch(t *testing.T) {
 			t.Error("stale openclaw-web-search allow entry should be removed")
 		}
 		if !hasOllama {
-			t.Error("expected plugins.allow to contain bundled ollama plugin")
+			t.Error("expected cores.allow to contain bundled ollama core")
 		}
 
 		tools, _ := config["tools"].(map[string]any)

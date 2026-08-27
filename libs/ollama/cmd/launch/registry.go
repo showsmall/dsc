@@ -237,7 +237,7 @@ var integrationSpecs = []*IntegrationSpec{
 	{
 		Name:        "pi",
 		Runner:      &Pi{},
-		Description: "Minimal AI agent toolkit with plugin support",
+		Description: "Minimal AI agent toolkit with core support",
 		Install: IntegrationInstallSpec{
 			CheckInstalled: func() bool {
 				_, err := exec.LookPath("pi")

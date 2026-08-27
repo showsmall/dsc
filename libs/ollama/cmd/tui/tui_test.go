@@ -68,7 +68,7 @@ func launcherTestState() *launch.LauncherState {
 			"pi": {
 				Name:        "pi",
 				DisplayName: "Pi",
-				Description: "Minimal AI agent toolkit with plugin support",
+				Description: "Minimal AI agent toolkit with core support",
 				Selectable:  true,
 				Changeable:  true,
 			},

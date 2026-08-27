@@ -322,7 +322,7 @@ func TestClaudeArgs(t *testing.T) {
 		{"with model and verbose", "llama3.2", []string{"--verbose"}, []string{"--model", "llama3.2", "--verbose"}},
 		{"empty model with help", "", []string{"--help"}, []string{"--help"}},
 		{"with allowed tools", "llama3.2", []string{"--allowedTools", "Read,Write,Bash"}, []string{"--model", "llama3.2", "--allowedTools", "Read,Write,Bash"}},
-		{"with channels", "llama3.2", []string{"--channels", "plugin:telegram@claude-plugins-official"}, []string{"--model", "llama3.2", "--channels", "plugin:telegram@claude-plugins-official"}},
+		{"with channels", "llama3.2", []string{"--channels", "core:telegram@claude-cores-official"}, []string{"--model", "llama3.2", "--channels", "core:telegram@claude-cores-official"}},
 	}
 
 	for _, tt := range tests {

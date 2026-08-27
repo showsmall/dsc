@@ -82,7 +82,7 @@ func chatModelRequest(model string) (api.ChatRequest, []string) {
 	} else if model == "granite3-guardian" || model == "shieldgemma" || model == "llama-guard3" || model == "bespoke-minicheck" {
 		anyResp = []string{"yes", "no", "safe", "unsafe"}
 	} else if model == "openthinker" {
-		anyResp = []string{"plugin", "im_sep", "components", "function call"}
+		anyResp = []string{"core", "im_sep", "components", "function call"}
 	} else if model == "starcoder" || model == "starcoder2" || model == "magicoder" || model == "deepseek-coder" {
 		req.Messages[0].Content = "def fibonacci():"
 		anyResp = []string{"f(n)", "sequence", "n-1", "main()", "__main__", "while"}

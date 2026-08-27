@@ -157,7 +157,7 @@ func ensureOMPWebSearchPlugin(bin string) {
 		return
 	}
 
-	fmt.Fprintf(os.Stderr, "%sChecking OMP web search plugin...%s\n", ansiGray, ansiReset)
+	fmt.Fprintf(os.Stderr, "%sChecking OMP web search core...%s\n", ansiGray, ansiReset)
 
 	installed, err := ompPluginInstalled(bin, ompWebSearchPlugin)
 	if err != nil {
@@ -175,7 +175,7 @@ func ensureOMPWebSearchPlugin(bin string) {
 	}
 
 	fmt.Fprintf(os.Stderr, "%s%s %s...%s\n", ansiGray, verb, ompWebSearchPlugin, ansiReset)
-	cmd := exec.Command(bin, "plugin", "install", ompWebSearchPlugin)
+	cmd := exec.Command(bin, "core", "install", ompWebSearchPlugin)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -186,8 +186,8 @@ func ensureOMPWebSearchPlugin(bin string) {
 	fmt.Fprintf(os.Stderr, "%s  ✓ %s %s%s\n", ansiGreen, doneVerb, ompWebSearchPlugin, ansiReset)
 }
 
-func ompPluginInstalled(bin, plugin string) (bool, error) {
-	cmd := exec.Command(bin, "plugin", "list")
+func ompPluginInstalled(bin, core string) (bool, error) {
+	cmd := exec.Command(bin, "core", "list")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		msg := strings.TrimSpace(string(out))
@@ -197,10 +197,10 @@ func ompPluginInstalled(bin, plugin string) (bool, error) {
 		return false, fmt.Errorf("%w: %s", err, msg)
 	}
 
-	versioned := plugin + "@"
+	versioned := core + "@"
 	for _, line := range strings.Split(string(out), "\n") {
 		trimmed := strings.TrimSpace(line)
-		if strings.Contains(trimmed, versioned) || trimmed == plugin {
+		if strings.Contains(trimmed, versioned) || trimmed == core {
 			return true, nil
 		}
 	}

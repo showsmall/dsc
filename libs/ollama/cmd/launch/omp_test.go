@@ -33,11 +33,11 @@ func runOMPTestHelper() {
 		}
 	}
 
-	if len(os.Args) >= 3 && os.Args[1] == "plugin" && os.Args[2] == "list" {
+	if len(os.Args) >= 3 && os.Args[1] == "core" && os.Args[2] == "list" {
 		fmt.Print(os.Getenv("OLLAMA_LAUNCH_OMP_TEST_PLUGIN_LIST"))
 		os.Exit(0)
 	}
-	if len(os.Args) >= 4 && os.Args[1] == "plugin" && os.Args[2] == "install" {
+	if len(os.Args) >= 4 && os.Args[1] == "core" && os.Args[2] == "install" {
 		if os.Getenv("OLLAMA_LAUNCH_OMP_TEST_FAIL_INSTALL") == "1" {
 			_, _ = fmt.Fprintln(os.Stderr, "install failed")
 			os.Exit(1)
@@ -139,13 +139,13 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 		t.Setenv("OLLAMA_HOST", srv.URL)
 	}
 
-	setup := func(t *testing.T, pluginList string, cloudDisabled bool) (string, *OMP) {
+	setup := func(t *testing.T, coreList string, cloudDisabled bool) (string, *OMP) {
 		t.Helper()
 		tmpDir := t.TempDir()
 		setOMPTestHome(t, tmpDir)
 		t.Setenv("PATH", tmpDir)
 		t.Setenv("OLLAMA_LAUNCH_OMP_TEST_HELPER", "1")
-		t.Setenv("OLLAMA_LAUNCH_OMP_TEST_PLUGIN_LIST", pluginList)
+		t.Setenv("OLLAMA_LAUNCH_OMP_TEST_PLUGIN_LIST", coreList)
 		logPath := filepath.Join(tmpDir, "omp.log")
 		t.Setenv("OLLAMA_LAUNCH_OMP_TEST_LOG", logPath)
 		setCloudStatus(t, cloudDisabled)
@@ -154,7 +154,7 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 	}
 
 	t.Run("web search missing installs before launch", func(t *testing.T) {
-		logPath, o := setup(t, "No plugins installed\n", false)
+		logPath, o := setup(t, "No cores installed\n", false)
 
 		if err := o.Run("kimi-k2.6:cloud", nil, []string{"session"}); err != nil {
 			t.Fatalf("Run() error = %v", err)
@@ -165,11 +165,11 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := string(calls)
-		if !strings.Contains(got, "plugin list\n") {
-			t.Fatalf("expected plugin list call, got:\n%s", got)
+		if !strings.Contains(got, "core list\n") {
+			t.Fatalf("expected core list call, got:\n%s", got)
 		}
-		if !strings.Contains(got, "plugin install "+ompWebSearchPlugin+"\n") {
-			t.Fatalf("expected plugin install call, got:\n%s", got)
+		if !strings.Contains(got, "core install "+ompWebSearchPlugin+"\n") {
+			t.Fatalf("expected core install call, got:\n%s", got)
 		}
 		if !strings.Contains(got, "--model ollama/kimi-k2.6:cloud session\n") {
 			t.Fatalf("expected final omp launch call, got:\n%s", got)
@@ -188,8 +188,8 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := string(calls)
-		if !strings.Contains(got, "plugin install "+ompWebSearchPlugin+"\n") {
-			t.Fatalf("expected plugin refresh install call, got:\n%s", got)
+		if !strings.Contains(got, "core install "+ompWebSearchPlugin+"\n") {
+			t.Fatalf("expected core refresh install call, got:\n%s", got)
 		}
 		if !strings.Contains(got, "--model ollama/gemma4 chat\n") {
 			t.Fatalf("expected final omp launch call, got:\n%s", got)
@@ -197,12 +197,12 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 	})
 
 	t.Run("web search install failure warns and continues", func(t *testing.T) {
-		logPath, o := setup(t, "No plugins installed\n", false)
+		logPath, o := setup(t, "No cores installed\n", false)
 		t.Setenv("OLLAMA_LAUNCH_OMP_TEST_FAIL_INSTALL", "1")
 
 		stderr := captureStderr(t, func() {
 			if err := o.Run("gemma4", nil, []string{"chat"}); err != nil {
-				t.Fatalf("Run() should continue after plugin install failure, got %v", err)
+				t.Fatalf("Run() should continue after core install failure, got %v", err)
 			}
 		})
 		if !strings.Contains(stderr, "Warning: could not install "+ompWebSearchPlugin) {
@@ -218,8 +218,8 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 		}
 	})
 
-	t.Run("cloud disabled skips web search plugin management", func(t *testing.T) {
-		logPath, o := setup(t, "No plugins installed\n", true)
+	t.Run("cloud disabled skips web search core management", func(t *testing.T) {
+		logPath, o := setup(t, "No cores installed\n", true)
 
 		stderr := captureStderr(t, func() {
 			if err := o.Run("gemma4", nil, []string{"chat"}); err != nil {
@@ -235,8 +235,8 @@ func TestOMPRun_WebSearchPluginLifecycle(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := string(calls)
-		if strings.Contains(got, "plugin list\n") || strings.Contains(got, "plugin install "+ompWebSearchPlugin+"\n") {
-			t.Fatalf("did not expect plugin management calls, got:\n%s", got)
+		if strings.Contains(got, "core list\n") || strings.Contains(got, "core install "+ompWebSearchPlugin+"\n") {
+			t.Fatalf("did not expect core management calls, got:\n%s", got)
 		}
 		if !strings.Contains(got, "--model ollama/gemma4 chat\n") {
 			t.Fatalf("expected final omp launch call, got:\n%s", got)
